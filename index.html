@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>竞彩智研 V3.0</title>
+<style>
+:root{--bg:#0b1220;--panel:#141f32;--panel2:#1b2a42;--line:#2a3b56;--text:#edf3ff;--muted:#93a5bf;--accent:#69d8b4;--red:#ff858b;--amber:#ffd27a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{padding:20px 16px 16px;background:linear-gradient(135deg,#1a304d,#101827);border-bottom:1px solid var(--line)}
+h1{margin:0 0 5px;font-size:22px}header p{margin:0;color:var(--muted);font-size:12px}
+main{max-width:900px;margin:auto;padding:14px}
+nav{display:flex;gap:8px;overflow:auto;margin-bottom:14px}nav button{white-space:nowrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--muted);padding:11px 14px}
+nav button.active,.primary{background:var(--accent);color:#062219;border-color:var(--accent);font-weight:700}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;margin-bottom:12px}
+h2{font-size:17px;margin:0 0 12px}h3{font-size:14px;margin:15px 0 7px;color:#d8e5f7}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#0e192a;color:var(--text);font-size:15px;min-width:0}
+textarea{min-height:76px;resize:vertical}.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{background:var(--panel2);padding:14px;border-radius:12px}.stat small{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:23px;margin-top:5px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}button{cursor:pointer;border-radius:9px;padding:10px 13px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+.danger{background:#472832;border-color:#70414c;color:#ffdade}.muted{color:var(--muted)}.small{font-size:12px;color:var(--muted);line-height:1.65}
+.pill{display:inline-block;padding:3px 8px;border-radius:20px;background:#293d59;color:#c8dcf4;font-size:11px;margin:2px 4px 2px 0}
+.item{padding:13px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
+.meta{font-size:12px;color:var(--muted);line-height:1.65;margin-top:5px}.empty{text-align:center;padding:24px 5px;color:var(--muted);font-size:13px}
+.good{color:var(--accent)}.bad{color:var(--red)}.warn{color:var(--amber)}
+.hidden{display:none!important}.section-note{padding:10px 12px;border-radius:9px;background:#10283a;color:#b8d5e9;font-size:12px;line-height:1.6;margin:10px 0}
+.analysis-box{background:#101b2c;border:1px solid var(--line);border-radius:11px;padding:12px;margin-top:10px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(2,1fr)}.row.three{grid-template-columns:repeat(3,1fr)}}
+</style></head>
+<body>
+<header><h1>竞彩智研 <span style="font-size:12px;color:var(--accent)">V2.2 网页版</span></h1><p>专注赛前判断与赛后复盘 · 资金只统计投注量和总盈亏</p></header>
+<main>
+<nav>
+<button class="active" data-tab="pre">赛前分析</button>
+<button data-tab="recommend">今日推荐</button>
+<button data-tab="post">赛后复盘</button>
+<button data-tab="overview">数据总览</button>
+</nav>
+
+<section id="pre" class="tab">
+<div class="card">
+<h2>建立一场赛前分析</h2>
+<div class="row">
+<div><label>比赛日期</label><input id="matchDate" type="date"></div>
+<div><label>联赛 / 赛事</label><input id="league" placeholder="例如：英超"></div>
+</div>
+<div class="row">
+<div><label>主队</label><input id="home" placeholder="主队名称"></div>
+<div><label>客队</label><input id="away" placeholder="客队名称"></div>
+</div>
+<h3>一、基本面与比赛背景</h3>
+<div class="row">
+<div><label>主队近期状态</label><textarea id="homeForm" placeholder="近5场战绩、进失球、主场表现"></textarea></div>
+<div><label>客队近期状态</label><textarea id="awayForm" placeholder="近5场战绩、进失球、客场表现"></textarea></div>
+</div>
+<div class="row">
+<div><label>伤停 / 阵容变化</label><textarea id="absences" placeholder="关键球员伤停、轮换、预计首发"></textarea></div>
+<div><label>战意 / 赛程因素</label><textarea id="motivation" placeholder="积分目标、杯赛分心、休息天数、旅途"></textarea></div>
+</div>
+<label>交锋与风格克制</label><textarea id="matchup" placeholder="历史交锋参考、战术风格、是否存在相互克制"></textarea>
+
+<h3>二、赔率与市场信号</h3>
+<div class="row three">
+<div><label>初始主胜</label><input id="openH" type="number" step=".01" placeholder="赔率"></div>
+<div><label>初始平局</label><input id="openD" type="number" step=".01" placeholder="赔率"></div>
+<div><label>初始客胜</label><input id="openA" type="number" step=".01" placeholder="赔率"></div>
+</div>
+<div class="row three">
+<div><label>即时主胜</label><input id="nowH" type="number" step=".01" placeholder="赔率"></div>
+<div><label>即时平局</label><input id="nowD" type="number" step=".01" placeholder="赔率"></div>
+<div><label>即时客胜</label><input id="nowA" type="number" step=".01" placeholder="赔率"></div>
+</div>
+<div class="row">
+<div><label>外围交易量 / 热度（手动记录）</label><textarea id="volume" placeholder="数据来源、主平客成交量、热度分布；没有数据可留空"></textarea></div>
+<div><label>盘口与赔率变化解读</label><textarea id="marketRead" placeholder="升降赔、盘口变化、是否过热、是否有异常背离"></textarea></div>
+</div>
+
+<h3>三、比赛走势与冷门判断</h3>
+<div class="row">
+<div><label>预计比赛走势</label><textarea id="flow" placeholder="谁控球、谁更可能先得分、节奏、攻防重点"></textarea></div>
+<div><label>冷门风险 / 不利因素</label><textarea id="upset" placeholder="热门方隐患、平局条件、爆冷路径、临场变量"></textarea></div>
+</div>
+
+<h3>四、最终独立结论</h3>
+<div class="row">
+<div><label>胜平负最终倾向</label><select id="pick"><option value="不建议投注">不建议投注 / 放弃</option><option value="胜">主胜</option><option value="平">平局</option><option value="负">客胜</option></select></div>
+<div><label>风险等级</label><select id="risk"><option>高</option><option selected>中</option><option>低</option></select></div>
+</div>
+<div class="row">
+<div><label>信心等级（主观评估）</label><select id="confidence"><option>谨慎</option><option selected>一般</option><option>较强</option></select></div>
+<div><label>是否实际投注</label><select id="betStatus"><option value="否">否</option><option value="是">是</option></select></div>
+</div>
+<div class="section-note">规则提醒：赔率 ≤ 1.40 的选项不作为推荐。最终结论以比赛信息和走势判断为主，不因热门或低赔率强行选胆。信息不足时应选择放弃。</div>
+<label>最终分析结论 / 推荐理由</label><textarea id="conclusion" placeholder="写清楚为什么选胜/平/负，主要依据是什么，最大的风险是什么；若放弃也写明原因。"></textarea>
+<div class="row" id="stakeRow">
+<div><label>本场投注量（元，未投注填 0）</label><input id="stake" type="number" min="0" step=".01" value="0"></div>
+<div><label>赛前预计比分（选填）</label><input id="scoreGuess" placeholder="例如 1-0"></div>
+</div>
+<div class="actions"><button class="primary" id="savePre">保存赛前分析</button><button id="clearPre">清空表单</button></div>
+</div>
+<div class="card"><h2>历史赛前分析</h2><div id="preList"></div></div>
+</section>
+
+
+<section id="recommend" class="tab hidden">
+<div class="card">
+<h2>今日推荐决策</h2>
+<div class="section-note">推荐不是强制投注指令。只有赛前信息、赔率和比赛走势相互支持时才考虑推荐；赔率 ≤ 1.40 不进入推荐。没有合适场次时，明确选择“今日不投注”。</div>
+<label>推荐比赛日期</label><input id="recDate" type="date">
+<label>推荐类型</label>
+<select id="recType">
+<option value="strong">强烈推荐（单场）</option>
+<option value="double">二串一</option>
+<option value="triple">三串一</option>
+<option value="none">今日不投注</option>
+</select>
+<label>选择对应的赛前分析场次</label>
+<div id="recMatches" class="analysis-box"><div class="empty">先保存赛前分析，场次会显示在这里</div></div>
+<label>推荐理由 / 组合逻辑</label>
+<textarea id="recReason" placeholder="写清楚入选原因、每场方向、赔率限制、主要风险；不投注时写明放弃原因。"></textarea>
+<label>风险提示</label>
+<select id="recRisk"><option>低（仍有风险）</option><option selected>中</option><option>高</option></select>
+<div class="actions"><button class="primary" id="saveRec">保存今日推荐</button></div>
+</div>
+<div class="card"><h2>推荐历史</h2><div id="recList"></div></div>
+</section>
+
+<section id="post" class="tab hidden">
+<div class="card">
+<h2>赛后复盘</h2>
+<label>选择已保存的比赛</label><select id="postMatch"><option value="">请选择比赛</option></select>
+<div class="row">
+<div><label>主队实际进球</label><input id="actualHome" type="number" min="0" step="1"></div>
+<div><label>客队实际进球</label><input id="actualAway" type="number" min="0" step="1"></div>
+</div>
+<div class="row">
+<div><label>本场实际盈亏（元）</label><input id="postPnl" type="number" step=".01" placeholder="盈利填正数，亏损填负数"></div>
+<div><label>赛后判断</label><select id="postVerdict"><option>分析命中</option><option>方向正确但过程判断错误</option><option>判断失误</option><option>赛前放弃，赛后观察</option></select></div>
+</div>
+<label>比赛走势复盘</label><textarea id="postFlow" placeholder="实际比赛节奏、关键转折、进球过程，是否符合赛前预判"></textarea>
+<div class="row">
+<div><label>赔率 / 市场判断复盘</label><textarea id="postMarket" placeholder="赔率变化是否有参考价值，是否误读市场信号"></textarea></div>
+<div><label>冷门风险复盘</label><textarea id="postUpset" placeholder="赛前是否识别到风险，冷门路径是否兑现"></textarea></div>
+</div>
+<label>错误原因与下一次改进</label><textarea id="lesson" placeholder="具体记录：信息遗漏、状态误判、过度相信热门、忽略赛程等"></textarea>
+<div class="actions"><button class="primary" id="savePost">保存赛后复盘</button></div>
+</div>
+<div class="card"><h2>历史赛后复盘</h2><div id="postList"></div></div>
+</section>
+
+<section id="overview" class="tab hidden">
+<div class="grid">
+<div class="stat"><small>累计投注量</small><strong id="totalStake">¥0.00</strong></div>
+<div class="stat"><small>总盈亏</small><strong id="totalPnl">¥0.00</strong></div>
+</div>
+<div class="card" style="margin-top:12px">
+<h2>真实推荐命中率</h2>
+<div class="grid">
+<div class="stat"><small>已结算推荐场次</small><strong id="settledPicks">0</strong></div>
+<div class="stat"><small>命中场次</small><strong id="hitPicks">0</strong></div>
+<div class="stat"><small>未命中场次</small><strong id="missPicks">0</strong></div>
+<div class="stat"><small>当前命中率</small><strong id="realHitRate">—</strong></div>
+</div>
+<p class="small" id="hitRateNote">只统计正式发布并锁定的胜平负推荐；待赛场次不计入分母，“今日不投注”不计入命中率。</p>
+</div>
+<div class="card" style="margin-top:12px"><h2>分析表现</h2><div id="performance" class="small">上方真实推荐命中率只统计正式发布并锁定的推荐场次。</div></div>
+<div class="card"><h2>数据备份</h2><div class="actions"><button id="backup">导出备份 JSON</button><button id="restoreBtn">导入备份 JSON</button><input id="restoreFile" type="file" accept=".json,application/json" class="hidden"></div><p class="small">数据保存在当前浏览器本地。V3.0首次打开会尝试读取同一浏览器中的V2.2数据；跨设备同步和云端自动备份尚未接入。更换设备或清理浏览器数据前，请先导出备份 JSON，再在新设备导入。</p></div>
+</section>
+</main>
+<footer style="max-width:900px;margin:auto;padding:0 14px 24px;color:var(--muted);font-size:11px">竞彩智研 V3.0 · 推荐战绩锁定统计 · 本地浏览器存储 · 请定期导出备份</footer>
+<script>
+const KEY='jingcai_zhiyan_v30';
+const OLD_KEY='jingcai_zhiyan_v22';
+let db;
+try {
+ const saved=localStorage.getItem(KEY);
+ const legacy=localStorage.getItem(OLD_KEY);
+ db=JSON.parse(saved || legacy || '{"matches":[],"reviews":[],"recommendations":[]}');
+ if(!saved && legacy) localStorage.setItem(KEY, JSON.stringify(db));
+} catch(e){db={matches:[],reviews:[],recommendations:[]}}
+if(!Array.isArray(db.matches))db.matches=[];if(!Array.isArray(db.reviews))db.reviews=[];if(!Array.isArray(db.recommendations))db.recommendations=[];
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'¥'+Number(n||0).toFixed(2);
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function labelPick(p){return p==='胜'?'主胜':p==='负'?'客胜':p}
+function result(h,a){return h>a?'胜':h===a?'平':'负'}
+function matchName(m){return m.home+' vs '+m.away}
+function preData(){
+ return {id:Date.now(),date:$('matchDate').value||today(),league:$('league').value.trim(),home:$('home').value.trim(),away:$('away').value.trim(),
+ homeForm:$('homeForm').value,awayForm:$('awayForm').value,absences:$('absences').value,motivation:$('motivation').value,matchup:$('matchup').value,
+ openH:$('openH').value,openD:$('openD').value,openA:$('openA').value,nowH:$('nowH').value,nowD:$('nowD').value,nowA:$('nowA').value,
+ volume:$('volume').value,marketRead:$('marketRead').value,flow:$('flow').value,upset:$('upset').value,pick:$('pick').value,risk:$('risk').value,
+ confidence:$('confidence').value,betStatus:$('betStatus').value,conclusion:$('conclusion').value,stake:Number($('stake').value||0),scoreGuess:$('scoreGuess').value.trim()};
+}
+$('savePre').onclick=()=>{const m=preData();if(!m.home||!m.away){alert('请先填写主队和客队');return}
+ if(m.stake<0||!Number.isFinite(m.stake)){alert('投注量不能为负数');return}
+ db.matches.unshift(m);save();alert('赛前分析已保存');};
+$('clearPre').onclick=()=>{if(confirm('清空赛前表单？')){document.querySelectorAll('#pre input,#pre textarea').forEach(x=>{if(x.id==='matchDate')x.value=today();else if(x.id==='stake')x.value='0';else x.value=''});$('pick').value='不建议投注';$('risk').value='中';$('confidence').value='一般';$('betStatus').value='否'}};
+function fillPostSelect(){const sel=$('postMatch'),old=sel.value;sel.innerHTML='<option value="">请选择比赛</option>'+db.matches.map(m=>`<option value="${m.id}">${esc(m.date)} · ${esc(matchName(m))} · 赛前：${esc(labelPick(m.pick))}</option>`).join('');if(db.matches.some(m=>String(m.id)===old))sel.value=old}
+$('savePost').onclick=()=>{const id=Number($('postMatch').value),m=db.matches.find(x=>x.id===id);if(!m){alert('请先选择一场比赛');return}
+ const h=$('actualHome').value,a=$('actualAway').value;if(!/^\d+$/.test(h)||!/^\d+$/.test(a)){alert('请输入有效的主客队比分');return}
+ const pnlVal=$('postPnl').value.trim();if(pnlVal!==''&&!Number.isFinite(Number(pnlVal))){alert('盈亏请输入数字，盈利为正、亏损为负');return}
+ const r={id:Date.now(),matchId:id,homeScore:Number(h),awayScore:Number(a),actual:result(Number(h),Number(a)),pnl:pnlVal===''?0:Number(pnlVal),verdict:$('postVerdict').value,flow:$('postFlow').value,market:$('postMarket').value,upset:$('postUpset').value,lesson:$('lesson').value};
+ const idx=db.reviews.findIndex(x=>x.matchId===id);if(idx>=0){if(!confirm('这场比赛已有复盘，是否覆盖旧复盘？'))return;db.reviews[idx]=r}else db.reviews.unshift(r);save();alert('赛后复盘已保存');};
+function delMatch(id){if(!confirm('删除这场赛前分析及对应复盘？'))return;db.matches=db.matches.filter(m=>m.id!==id);db.reviews=db.reviews.filter(r=>r.matchId!==id);save()}
+function delReview(id){if(confirm('删除这条复盘？')){db.reviews=db.reviews.filter(r=>r.id!==id);save()}}
+
+function selectedRecMatches(){
+ const boxes=[...document.querySelectorAll('#recMatches input[type=checkbox]:checked')];
+ return boxes.map(x=>Number(x.value));
+}
+function renderRecChoices(){
+ const type=$('recType').value;
+ const targetDate=$('recDate').value||today();
+ const matches=db.matches.filter(m=>m.date===targetDate);
+ const limit=type==='strong'?1:type==='double'?2:type==='triple'?3:0;
+ if(type==='none'){
+  $('recMatches').innerHTML='<div class="small">今天没有值得参与的比赛，记录“不投注”也是有效决策。</div>';
+  return;
+ }
+ if(!matches.length){$('recMatches').innerHTML='<div class="empty">今天还没有保存的赛前分析</div>';return}
+ $('recMatches').innerHTML=matches.map(m=>{
+  const odds= m.pick==='胜'?m.nowH:m.pick==='平'?m.nowD:m.pick==='负'?m.nowA:'';
+  const tooLow=odds!==''&&Number(odds)>0&&Number(odds)<=1.4;
+  const dis=m.pick==='不建议投注'||tooLow;
+  return `<label style="display:flex;gap:9px;align-items:flex-start;color:var(--text);padding:8px 0;border-bottom:1px solid var(--line)">
+   <input type="checkbox" value="${m.id}" ${dis?'disabled':''} style="width:auto;margin-top:3px">
+   <span><b>${esc(m.home)} vs ${esc(m.away)}</b><br><span class="meta">倾向：${esc(labelPick(m.pick))} · 风险：${esc(m.risk)} · 即时对应赔率：${odds||'未填'} ${tooLow?'· 赔率≤1.40，排除推荐':''} ${m.pick==='不建议投注'?'· 赛前结论为放弃':''}</span></span>
+  </label>`;
+ }).join('');
+}
+$('recType').onchange=renderRecChoices;
+$('recDate').onchange=renderRecChoices;
+$('saveRec').onclick=()=>{
+ const type=$('recType').value,ids=selectedRecMatches();
+ const required=type==='strong'?1:type==='double'?2:type==='triple'?3:0;
+ if(ids.length!==required){alert(type==='none'?'今日不投注无需选择比赛。':`此类型需要选择 ${required} 场，当前选择 ${ids.length} 场。`);return}
+ const chosen=ids.map(id=>db.matches.find(m=>m.id===id)).filter(Boolean);
+ if(chosen.some(m=>m.pick==='不建议投注')){alert('已选择赛前结论为放弃的比赛，不能纳入推荐。');return}
+ for(const m of chosen){
+  const o=m.pick==='胜'?m.nowH:m.pick==='平'?m.nowD:m.nowA;
+  if(o!==''&&Number(o)>0&&Number(o)<=1.4){alert('已选择场次中存在赔率≤1.40的选项，按既定规则必须排除。');return}
+ }
+ const rec={id:Date.now(),date:$('recDate').value||today(),type,matchIds:ids,reason:$('recReason').value.trim(),risk:$('recRisk').value};
+ db.recommendations.unshift(rec);save();$('recReason').value='';alert('今日推荐已保存。');
+};
+function deleteRec(id){if(confirm('删除这条推荐记录？')){db.recommendations=db.recommendations.filter(r=>r.id!==id);save()}}
+
+function render(){
+ $('matchDate').value=$('matchDate').value||today();fillPostSelect();
+ renderRecChoices();
+ $('recList').innerHTML=db.recommendations.length?db.recommendations.map(r=>{
+  const names=r.matchIds.map(id=>db.matches.find(m=>m.id===id)).filter(Boolean).map(m=>matchName(m)).join(' + ');
+  const title={strong:'强烈推荐（单场）',double:'二串一',triple:'三串一',none:'今日不投注'}[r.type]||r.type;
+  return `<div class="item"><b>${title}</b><span class="pill">风险 ${esc(r.risk)}</span><div class="meta">${esc(r.date)}<br>${esc(names||'无投注场次')}<br>${esc(r.reason||'未填写理由')}</div><button class="danger" onclick="deleteRec(${r.id})">删除</button></div>`;
+ }).join(''):'<div class="empty">暂无推荐记录</div>';
+ $('preList').innerHTML=db.matches.length?db.matches.map(m=>{let r=db.reviews.find(x=>x.matchId===m.id);return `<div class="item"><b>${esc(matchName(m))}</b><span class="pill">${esc(m.league||'未填赛事')}</span><span class="pill">倾向 ${esc(labelPick(m.pick))}</span><span class="pill">风险 ${esc(m.risk)}</span><div class="meta">${esc(m.date)} · 信心 ${esc(m.confidence)} · 投注量 ${money(m.stake)}<br>${esc(m.conclusion||'未填写结论')}<br>${r?'已完成赛后复盘':'等待赛后复盘'}</div><div class="actions"><button class="danger" onclick="delMatch(${m.id})">删除</button></div></div>`}).join(''):'<div class="empty">还没有赛前分析记录</div>';
+ $('postList').innerHTML=db.reviews.length?db.reviews.map(r=>{let m=db.matches.find(x=>x.id===r.matchId);return `<div class="item"><b>${m?esc(matchName(m)):'比赛记录'}</b><span class="pill">${r.homeScore}-${r.awayScore}</span><span class="pill">${esc(r.verdict)}</span><div class="meta">实际赛果：${labelPick(r.actual)} · 本场盈亏：<b class="${r.pnl>=0?'good':'bad'}">${r.pnl>=0?'+':''}${money(r.pnl)}</b><br>走势：${esc(r.flow||'未填写')}<br>改进：${esc(r.lesson||'未填写')}</div><button class="danger" onclick="delReview(${r.id})">删除复盘</button></div>`}).join(''):'<div class="empty">还没有赛后复盘</div>';
+ const stake=db.matches.reduce((s,m)=>s+Number(m.stake||0),0),profit=db.reviews.reduce((s,r)=>s+Number(r.pnl||0),0);
+ $('totalStake').textContent=money(stake);$('totalPnl').textContent=(profit>=0?'+':'')+money(profit);$('totalPnl').className=profit>=0?'good':'bad';
+ const reviewed=db.reviews.filter(r=>{let m=db.matches.find(x=>x.id===r.matchId);return m&&m.pick!=='不建议投注'}),hit=reviewed.filter(r=>{let m=db.matches.find(x=>x.id===r.matchId);return m.pick===r.actual}).length;
+ $('performance').textContent=reviewed.length?`已复盘且有明确推荐的比赛：${reviewed.length} 场；方向命中：${hit} 场；命中率：${(hit/reviewed.length*100).toFixed(1)}%。注意：样本量较小时，命中率不代表长期盈利能力。`:'完成赛后复盘后，这里会统计赛前明确推荐的方向命中率。';
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.tab));render()});
+function download(name,data,type){const u=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+$('backup').onclick=()=>download('竞彩智研V3备份.json',JSON.stringify(db,null,2),'application/json');
+$('restoreBtn').onclick=()=>$('restoreFile').click();
+$('restoreFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.matches)||!Array.isArray(d.reviews))throw Error();if(!confirm('导入备份将覆盖当前数据，确定继续？'))return;db=d;if(!Array.isArray(db.recommendations))db.recommendations=[];save();alert('恢复成功')}catch(x){alert('备份文件格式不正确')}finally{e.target.value=''}};
+$('matchDate').value=today();$('recDate').value=today();render();
+</script>
+<script>
+/* V3.0: 锁定正式推荐快照，命中率只以已发布推荐为样本 */
+const _v30OriginalRender = render;
+function frozenLegs(rec){
+  if(Array.isArray(rec.legs)) return rec.legs;
+  return (rec.matchIds||[]).map(id=>{
+    const m=db.matches.find(x=>x.id===id);
+    return m ? {matchId:m.id,date:m.date,league:m.league,home:m.home,away:m.away,pick:m.pick,
+      odds:Number(m.pick==='胜'?m.nowH:m.pick==='平'?m.nowD:m.nowA)||null} : null;
+  }).filter(Boolean);
+}
+function v30Stats(){
+  const legs=db.recommendations.filter(r=>r.type!=='none').flatMap(r=>frozenLegs(r));
+  let settled=0,hit=0,miss=0,pending=0;
+  for(const leg of legs){
+    const review=db.reviews.find(x=>x.matchId===leg.matchId);
+    if(!review){pending++;continue;}
+    settled++;
+    if(review.actual===leg.pick) hit++; else miss++;
+  }
+  const rate=settled ? (hit/settled*100).toFixed(1)+'%' : '—';
+  const set=(id,val)=>{const el=$(id);if(el)el.textContent=val;};
+  set('settledPicks',settled);set('hitPicks',hit);set('missPicks',miss);set('realHitRate',rate);
+  set('hitRateNote',`正式推荐共 ${legs.length} 场 · 已结算 ${settled} 场 · 待结算 ${pending} 场。仅按赛前锁定方向与最终赛果逐场核对；不投注记录不参与统计。`);
+}
+render=function(){_v30OriginalRender();v30Stats();};
+const _v30OldSaveRec=$('saveRec').onclick;
+$('saveRec').onclick=()=>{
+  const type=$('recType').value, ids=selectedRecMatches();
+  const required=type==='strong'?1:type==='double'?2:type==='triple'?3:0;
+  if(ids.length!==required){alert(type==='none'?'今日不投注无需选择比赛。':`此类型需要选择 ${required} 场，当前选择 ${ids.length} 场。`);return;}
+  const chosen=ids.map(id=>db.matches.find(m=>m.id===id)).filter(Boolean);
+  if(chosen.length!==ids.length){alert('有场次记录不存在，请重新选择。');return;}
+  if(chosen.some(m=>m.pick==='不建议投注')){alert('放弃场次不能纳入正式推荐。');return;}
+  for(const m of chosen){
+    const o=m.pick==='胜'?m.nowH:m.pick==='平'?m.nowD:m.nowA;
+    if(o!==''&&Number(o)>0&&Number(o)<=1.4){alert('赔率≤1.40的选项必须排除。');return;}
+  }
+  const rec={id:Date.now(),date:$('recDate').value||today(),type,matchIds:ids,
+    legs:chosen.map(m=>({matchId:m.id,date:m.date,league:m.league,home:m.home,away:m.away,pick:m.pick,
+      odds:Number(m.pick==='胜'?m.nowH:m.pick==='平'?m.nowD:m.nowA)||null})),
+    reason:$('recReason').value.trim(),risk:$('recRisk').value,publishedAt:new Date().toISOString(),locked:true};
+  db.recommendations.unshift(rec);save();$('recReason').value='';
+  alert('正式推荐已发布并锁定。赛后系统将按这份原始方向统计命中率。');
+};
+deleteRec=function(id){alert('V3.0正式推荐发布后不可删除或修改，避免历史命中率被人为美化。');};
+delMatch=function(id){
+  if(db.recommendations.some(r=>frozenLegs(r).some(l=>l.matchId===id))){
+    alert('该比赛已进入正式推荐记录，不能删除，以保护真实命中率。');return;
+  }
+  if(!confirm('删除这场赛前分析及对应复盘？'))return;
+  db.matches=db.matches.filter(m=>m.id!==id);db.reviews=db.reviews.filter(r=>r.matchId!==id);save();
+};
+delReview=function(id){alert('V3.0暂不允许删除赛后结果记录，以免影响历史统计；如比分录入错误，请联系后续版本增加更正审计功能。');};
+render();
+</script>
+
+</body></html>
