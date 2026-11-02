@@ -1,23 +1,221 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081120"><title>竞彩智研 V3.0</title><style>
-:root{--bg:#081120;--p:#142238;--line:#2a3b58;--txt:#e8eef8;--muted:#9baac0;--mint:#63d8b5;--gold:#f0bd68}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}header{padding:22px 18px;background:#0c1729;border-bottom:1px solid var(--line)}h1{margin:0 0 8px;font-size:25px}header p,.small{color:var(--muted);font-size:13px;line-height:1.65}nav{display:flex;gap:8px;padding:13px;overflow:auto;position:sticky;top:0;background:var(--bg)}button{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--p);color:var(--muted);white-space:nowrap}button.active,.primary{background:var(--mint);color:#06251d;font-weight:bold}main{max-width:850px;margin:auto;padding:0 13px 30px}.card,.match{background:var(--p);border:1px solid var(--line);border-radius:16px;padding:15px;margin:9px 0 14px}h2{font-size:19px;margin:0 0 12px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{margin:9px 0}.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}input,textarea,select{width:100%;padding:11px;background:#0b1729;color:var(--txt);border:1px solid var(--line);border-radius:10px;font:inherit}textarea{min-height:70px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.status{background:#0b192b;padding:11px;border-radius:10px;color:var(--muted);font-size:13px;line-height:1.6}.hidden{display:none}.pill{display:inline-block;background:#20324b;padding:6px 8px;border-radius:8px;font-size:12px;margin:5px 4px 0 0}.empty{text-align:center;color:var(--muted);padding:18px}.metric{font-size:24px;font-weight:bold}footer{padding:18px;color:var(--muted);font-size:11px;line-height:1.7}
-</style></head><body><header><h1>竞彩智研 <span style="color:var(--mint);font-size:14px">V3.0 试运行版</span></h1><p>赛前筛选 · 临场复核 · 赛后复盘<br>只看普通胜平负｜赔率 ≤ 1.40 自动排除｜宁缺毋滥</p></header>
-<nav><button class="active" data-tab="pre">赛前分析</button><button data-tab="today">今日推荐</button><button data-tab="review">赛后复盘</button><button data-tab="stats">数据总览</button></nav><main>
-<section id="pre"><div class="card"><h2>今日官方赛事数据</h2><div id="feed" class="status">点击获取官方数据。若官方接口拒绝访问，会明确提示，不会用模拟数据冒充真实比赛。</div><div class="actions"><button class="primary" id="load">获取官方数据</button><button id="refresh">刷新</button></div><p id="stamp" class="small">尚未获取数据</p><div id="matches" class="empty">暂无已核验赛事</div></div>
-<div class="card"><h2>单场风险评估</h2><p class="small">仅供手动补充；球队信息必须来自你已核实的来源。</p><div class="row"><div class="field"><label>主队</label><input id="home" placeholder="主队"></div><div class="field"><label>客队</label><input id="away" placeholder="客队"></div></div><div class="row"><div class="field"><label>主胜赔率</label><input id="h" type="number" step=".01"></div><div class="field"><label>平局赔率</label><input id="d" type="number" step=".01"></div></div><div class="field"><label>客胜赔率</label><input id="a" type="number" step=".01"></div><div class="field"><label>近期状态、伤停、战意等已核实信息</label><textarea id="facts"></textarea></div><button class="primary" id="analyze">生成风险评估</button><div id="analysis" class="status" style="margin-top:10px">等待分析</div></div></section>
-<section id="today" class="hidden"><div class="card"><h2>今日推荐候选</h2><p class="small">仅基于官方赔率做初筛；未核实球队状态、伤停、战意前，不会标记强烈推荐。</p><div id="recs" class="empty">请先获取官方数据</div></div></section>
-<section id="review" class="hidden"><div class="card"><h2>赛后复盘</h2><div class="field"><label>比赛名称</label><input id="rname" placeholder="主队 vs 客队"></div><div class="row"><div class="field"><label>赛前选择</label><select id="rp"><option value="H">主胜</option><option value="D">平局</option><option value="A">客胜</option></select></div><div class="field"><label>实际赛果</label><select id="rr"><option value="H">主胜</option><option value="D">平局</option><option value="A">客胜</option></select></div></div><button class="primary" id="saveR">保存复盘</button><div id="rh"></div></div></section>
-<section id="stats" class="hidden"><div class="card"><h2>数据总览</h2><div class="row"><div><div class="small">复盘场次</div><div class="metric" id="cnt">0</div></div><div><div class="small">方向命中率</div><div class="metric" id="rate">—</div></div></div><p class="small">真实投注量和盈亏必须按实际出票记录录入；命中率不等于收益率。</p><div class="row"><div class="field"><label>本次投注量（元）</label><input id="stake" type="number" min="0"></div><div class="field"><label>本次实际盈亏（元）</label><input id="profit" type="number" step=".01"></div></div><button class="primary" id="saveM">保存金额记录</button><div class="row"><div><div class="small">累计投注量</div><div class="metric" id="sumS">0.00</div></div><div><div class="small">总盈亏</div><div class="metric" id="sumP">0.00</div></div></div></div></section></main>
-<footer>数据源尝试：中国体育彩票公开计算器接口。该接口非稳定承诺的开放 API，可能被限流或拦截。当前试运行版只尝试读取胜平负赔率，未接入球队战绩、伤停、首发、AI模型或云端数据库。复盘与金额记录保存在当前浏览器。理性参与，不追损、不加码。</footer>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>竞彩智研 V3.1</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#081120;color:#e5edf9;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+header{padding:24px 18px;background:#101b30;border-bottom:1px solid #2a3b58}
+h1{font-size:25px;margin:0 0 10px}
+.sub,.muted{color:#9eacc2;font-size:13px;line-height:1.7}
+nav{display:flex;gap:8px;padding:14px;overflow:auto}
+button{background:#1a2941;color:#dce8fa;border:1px solid #344867;border-radius:12px;padding:12px 16px;font-size:14px}
+button.active,.primary{background:#79d5b5;color:#071b20;border:0;font-weight:bold}
+main{padding:0 14px 35px;max-width:900px;margin:auto}
+section,.card{background:#17243a;border:1px solid #30415e;border-radius:18px;padding:16px;margin:12px 0}
+h2{font-size:19px;margin:0 0 12px}
+h3{font-size:16px}
+input,select,textarea{width:100%;background:#0e192b;color:#e5edf9;border:1px solid #344867;border-radius:9px;padding:12px;margin:5px 0 10px;font-size:14px}
+textarea{min-height:100px}
+label{font-size:13px;color:#aab8cc}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.badge{display:inline-block;background:#263b56;padding:5px 9px;border-radius:8px;color:#a9ddce;font-size:12px}
+.item{border-top:1px solid #34445e;padding:12px 0;line-height:1.8}
+.hidden{display:none}
+img{max-width:100%;border-radius:10px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:9px 4px;border-bottom:1px solid #34445e;text-align:left}
+.good{color:#79d5b5}.bad{color:#ff9e9e}
+footer{text-align:center;color:#8190a6;font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header>
+<h1>竞彩智研 <span class="good">V3.1 试运行版</span></h1>
+<div class="sub">赛前分析 · 临场复核 · 赛后复盘</div>
+<div class="sub">胜平负 + 让球胜平负｜赔率≤1.40自动排除｜宁缺毋滥</div>
+</header>
+
+<nav>
+<button class="active" data-tab="pre">赛前分析</button>
+<button data-tab="today">今日推荐</button>
+<button data-tab="review">赛后复盘</button>
+<button data-tab="stats">数据总览</button>
+</nav>
+
+<main>
+<section id="pre">
+<h2>① 自动获取体彩赛事</h2>
+<p class="muted">尝试获取公开赛事数据。接口不可用时，请上传官方截图或手动录入。不会虚构比赛数据。</p>
+<div class="row">
+<button class="primary" id="fetch">获取官方数据</button>
+<button id="refresh">刷新</button>
+</div>
+<div id="status" class="item muted">尚未获取数据。</div>
+<div id="matches"></div>
+
+<h2>② 自动获取失败：上传官方截图</h2>
+<p class="muted">支持选择多张图片。请核对截图中的比赛编号、球队、赔率和让球数。</p>
+<input id="pics" type="file" accept="image/*" multiple>
+<div id="previews"></div>
+<textarea id="ocr" placeholder="可在这里粘贴截图识别文字，或手动整理赛事信息。"></textarea>
+
+<h2>③ 赛事数据录入与核对</h2>
+<p class="muted">每场填写编号、主队、客队、胜平负赔率，以及主队让球数和让球胜平负赔率。赔率≤1.40自动排除。</p>
+<div class="grid">
+<div><label>比赛编号</label><input id="num" placeholder="例如 001"></div>
+<div><label>主队让球数（主队视角）</label><input id="handicap" type="number" placeholder="例如 -1 或 +1"></div>
+<div><label>主队</label><input id="home" placeholder="主队名称"></div>
+<div><label>客队</label><input id="away" placeholder="客队名称"></div>
+<div><label>胜平负：主胜</label><input id="h" type="number" step="0.01"></div>
+<div><label>胜平负：平局</label><input id="d" type="number" step="0.01"></div>
+<div><label>胜平负：客胜</label><input id="a" type="number" step="0.01"></div>
+<div><label>让球胜</label><input id="lh" type="number" step="0.01"></div>
+<div><label>让球平</label><input id="ld" type="number" step="0.01"></div>
+<div><label>让球负</label><input id="la" type="number" step="0.01"></div>
+</div>
+<button class="primary" id="add">添加并保存赛事</button>
+<div id="entrylist"></div>
+
+<h2>④ 赛前候选</h2>
+<p class="muted">这里只筛选赔率高于1.40的选项，不代表预测结论。球队状态、伤停、首发和战意仍需核实。</p>
+<div id="candidates" class="item muted">暂无已录入赛事。</div>
+</section>
+
+<section id="today" class="hidden">
+<h2>今日推荐</h2>
+<p class="muted">只展示已录入且赔率高于1.40的候选方向。没有充分依据时应选择不投注。</p>
+<div id="recommend"></div>
+</section>
+
+<section id="review" class="hidden">
+<h2>赛后复盘</h2>
+<div class="grid">
+<div><label>比赛编号</label><input id="rnum" placeholder="比赛编号"></div>
+<div><label>实际赛果</label>
+<select id="result"><option value="">选择赛果</option><option>主胜</option><option>平局</option><option>客胜</option></select></div>
+<div><label>让球实际赛果</label>
+<select id="rhand"><option value="">选择赛果</option><option>让胜</option><option>让平</option><option>让负</option></select></div>
+<div><label>本场投注金额</label><input id="stake" type="number" step="0.01"></div>
+<div><label>本场实际盈亏（元）</label><input id="profit" type="number" step="0.01"></div>
+</div>
+<label>复盘备注</label>
+<textarea id="note" placeholder="记录判断正确或失误的原因"></textarea>
+<button class="primary" id="saveReview">保存复盘</button>
+<div id="reviews"></div>
+</section>
+
+<section id="stats" class="hidden">
+<h2>数据总览</h2>
+<div class="grid">
+<div class="card"><div class="muted">累计投注量</div><h2 id="totalStake">0元</h2></div>
+<div class="card"><div class="muted">累计总盈亏</div><h2 id="totalProfit">0元</h2></div>
+<div class="card"><div class="muted">已复盘场次</div><h2 id="totalCount">0</h2></div>
+<div class="card"><div class="muted">复盘命中率</div><h2 id="hitRate">暂无</h2></div>
+</div>
+<p class="muted">数据保存在当前浏览器。清理浏览器数据或更换设备可能导致记录丢失，请定期备份。</p>
+<button id="export">导出数据备份</button>
+<input id="importFile" type="file" accept=".json">
+<button id="import">导入备份</button>
+</section>
+</main>
+<footer>竞彩智研 V3.1 试运行版 · 不保证预测或盈利 · 不追损、不加码</footer>
+
 <script>
-const $=x=>document.getElementById(x),get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set=(k,v)=>localStorage.setItem(k,JSON.stringify(v));let ms=[];
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));['pre','today','review','stats'].forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));render()});
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));const f=n=>Number(n)>0?Number(n).toFixed(2):'—';
-async function load(){ $('feed').textContent='正在请求体彩公开数据…';try{let r=await fetch('/.netlify/functions/matches');let j=await r.json();if(!r.ok||!j.success)throw Error(j.error||'接口请求失败');ms=j.matches||[];$('stamp').textContent='更新时间：'+j.updatedAt+'｜来源：'+j.source;$('feed').textContent=j.notice||('读取到 '+ms.length+' 场');renderMatches()}catch(e){ms=[];$('feed').textContent='获取失败：'+e.message+'。可能是官方接口限流/WAF拦截或数据格式变化；请稍后重试。不会显示虚构数据。';$('matches').textContent='暂无可核验赛事'}}
-function renderMatches(){if(!ms.length){$('matches').textContent='暂无可核验赛事';return} $('matches').innerHTML=ms.map((m,i)=>`<div class="match"><b>${esc(m.matchNo)} ${esc(m.league)}</b><p>${esc(m.home)} vs ${esc(m.away)}</p><span class="pill">主胜 ${f(m.odds.h)}</span><span class="pill">平 ${f(m.odds.d)}</span><span class="pill">客胜 ${f(m.odds.a)}</span><p class="small">${esc(m.kickoff)}｜官方数据更新 ${esc(m.updatedAt)}</p><button onclick="useMatch(${i})">载入风险评估</button></div>`).join('');$('recs').innerHTML=ms.map(m=>`<div class="match"><b>${esc(m.home)} vs ${esc(m.away)}</b><p class="small">赔率：主 ${f(m.odds.h)} / 平 ${f(m.odds.d)} / 客 ${f(m.odds.a)}</p><p class="small" style="color:var(--gold)">仅为赔率展示。缺少已核实基本面，暂不作强烈推荐。</p></div>`).join('')}
-window.useMatch=i=>{let m=ms[i];$('home').value=m.home;$('away').value=m.away;$('h').value=m.odds.h;$('d').value=m.odds.d;$('a').value=m.odds.a;document.querySelector('[data-tab=pre]').click()};
-$('load').onclick=load;$('refresh').onclick=load;
-$('analyze').onclick=()=>{let o=[$('h').value,$('d').value,$('a').value].map(Number);if(!o.every(x=>x>0))return $('analysis').textContent='请填写三项有效赔率';let p=o.map(x=>1/x),s=p.reduce((a,b)=>a+b,0);p=p.map(x=>x/s);let names=['主胜','平局','客胜'];let ok=o.map((v,i)=>v>1.4?names[i]+' '+v.toFixed(2):null).filter(Boolean);$('analysis').textContent='赔率归一化隐含概率估算：主胜 '+(p[0]*100).toFixed(1)+'%，平局 '+(p[1]*100).toFixed(1)+'%，客胜 '+(p[2]*100).toFixed(1)+'%。高于1.40的选项：'+(ok.join('、')||'无，全部排除')+'。赔率本身不能证明真实胜率、诱盘或冷门；缺少基本面核验，不给强烈推荐。补充信息：'+$('facts').value};
-const labels={H:'主胜',D:'平局',A:'客胜'};function render(){let a=get('reviews',[]),hit=a.filter(x=>x.hit).length;$('cnt').textContent=a.length;$('rate').textContent=a.length?(hit/a.length*100).toFixed(1)+'%':'—';$('rh').innerHTML=a.slice().reverse().map(x=>`<div class="match">${esc(x.name)}｜选择${x.pick}｜赛果${x.result}｜${x.hit?'命中':'未中'}</div>`).join('');let m=get('money',[]);$('sumS').textContent=m.reduce((s,x)=>s+x.s,0).toFixed(2);$('sumP').textContent=m.reduce((s,x)=>s+x.p,0).toFixed(2)}
-$('saveR').onclick=()=>{if(!$('rname').value.trim())return alert('请填写比赛名称');let a=get('reviews',[]);a.push({name:$('rname').value,pick:labels[$('rp').value],result:labels[$('rr').value],hit:$('rp').value===$('rr').value});set('reviews',a);$('rname').value='';render()};
-$('saveM').onclick=()=>{let s=Number($('stake').value),p=Number($('profit').value);if(s<0||!Number.isFinite(s)||!Number.isFinite(p))return alert('金额填写无效');let m=get('money',[]);m.push({s,p});set('money',m);$('stake').value='';$('profit').value='';render()};render();
-</script></body></html>
+const $=id=>document.getElementById(id);
+const read=(k,d=[])=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}};
+let games=read("jy_games"),reviews=read("jy_reviews");
+const save=()=>{localStorage.setItem("jy_games",JSON.stringify(games));localStorage.setItem("jy_reviews",JSON.stringify(reviews));render()};
+const val=id=>$(id).value.trim();
+const num=id=>Number($(id).value)||0;
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ b.classList.add("active");
+ document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+ $(b.dataset.tab).classList.remove("hidden");
+ render();
+});
+
+async function load(){
+ $("status").textContent="正在请求体彩公开接口……";
+ try{
+  const r=await fetch("/.netlify/functions/matches",{cache:"no-store"});
+  const data=await r.json();
+  if(!r.ok)throw Error(data.error||"接口请求失败");
+  $("status").textContent="接口返回 "+(data.count??data.matches?.length??0)+" 场；请核对数据后再录入。";
+  if(Array.isArray(data.matches)){
+   $("matches").innerHTML=data.matches.map(m=>`<div class="item">${esc(m.id)} ${esc(m.home)} VS ${esc(m.away)}　赔率：${esc(m.h)} / ${esc(m.d)} / ${esc(m.a)}</div>`).join("");
+  }
+ }catch(e){$("status").textContent="获取失败："+e.message+"。请稍后再试，或上传官方截图。"}
+}
+$("fetch").onclick=load;
+$("refresh").onclick=load;
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("pics").onchange=()=>{
+ $("previews").innerHTML="";
+ [...$("pics").files].forEach(f=>{
+  const img=document.createElement("img");
+  img.alt=f.name;img.src=URL.createObjectURL(f);
+  $("previews").append(img);
+ });
+};
+
+$("add").onclick=()=>{
+ if(!val("home")||!val("away"))return alert("请填写主队和客队");
+ const g={id:val("num"),home:val("home"),away:val("away"),handicap:val("handicap"),
+ h:num("h"),d:num("d"),a:num("a"),lh:num("lh"),ld:num("ld"),la:num("la")};
+ games.push(g);
+ ["num","home","away","handicap","h","d","a","lh","ld","la"].forEach(x=>$(x).value="");
+ save();
+};
+
+function options(g){
+ const arr=[];
+ [["胜平负","主胜",g.h],["胜平负","平局",g.d],["胜平负","客胜",g.a],
+ ["让球胜平负","让胜",g.lh],["让球胜平负","让平",g.ld],["让球胜平负","让负",g.la]]
+ .forEach(x=>{if(x[2]>1.4)arr.push(x[0]+" "+x[1]+"（"+x[2]+"）")});
+ return arr;
+}
+function render(){
+ $("entrylist").innerHTML=games.map((g,i)=>`<div class="item">${esc(g.id)}　${esc(g.home)} VS ${esc(g.away)}<br>让球：${esc(g.handicap)}<br>${options(g).join("；")||"没有符合赔率条件的选项"} <button onclick="delGame(${i})">删除</button></div>`).join("");
+ $("candidates").innerHTML=games.map(g=>`<div class="item"><b>${esc(g.id)} ${esc(g.home)} VS ${esc(g.away)}</b><br>${options(g).join("；")||"无合格赔率选项"}</div>`).join("")||"暂无已录入赛事";
+ $("recommend").innerHTML=$("candidates").innerHTML;
+ $("reviews").innerHTML=reviews.map(r=>`<div class="item">${esc(r.id)}　赛果：${esc(r.result)}　让球：${esc(r.hand)}<br>投注 ${r.stake} 元，盈亏 ${r.profit} 元<br>${esc(r.note)}</div>`).join("");
+ const stake=reviews.reduce((s,r)=>s+r.stake,0),profit=reviews.reduce((s,r)=>s+r.profit,0);
+ $("totalStake").textContent=stake.toFixed(2)+"元";
+ $("totalProfit").textContent=profit.toFixed(2)+"元";
+ $("totalProfit").className=profit>=0?"good":"bad";
+ $("totalCount").textContent=reviews.length;
+ const hit=reviews.filter(r=>r.hit).length;
+ $("hitRate").textContent=reviews.length?(hit/reviews.length*100).toFixed(1)+"%":"暂无";
+}
+window.delGame=i=>{if(confirm("确定删除这场赛事？")){games.splice(i,1);save()}};
+
+$("saveReview").onclick=()=>{
+ if(!val("rnum")||!val("result"))return alert("请填写比赛编号和实际赛果");
+ const g=games.find(x=>x.id===val("rnum"));
+ const r={id:val("rnum"),result:val("result"),hand:val("rhand"),stake:num("stake"),profit:num("profit"),note:val("note"),hit:false};
+ if(g){
+  const picks=options(g);
+  r.hit=picks.some(p=>p.includes(r.result))||picks.some(p=>p.includes(r.hand));
+ }
+ reviews.push(r);save();
+ ["rnum","result","rhand","stake","profit","note"].forEach(x=>$(x).value="");
+};
+$("export").onclick=()=>{
+ const blob=new Blob([JSON.stringify({games,reviews},null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="竞彩智研备份.json";a.click();
+};
+$("import").onclick=()=>{
+ const f=$("importFile").files[0];if(!f)return alert("请先选择备份文件");
+ const reader=new FileReader();reader.onload=()=>{try{const d=JSON.parse(reader.result);games=d.games||[];reviews=d.reviews||[];save();alert("导入成功")}catch{alert("备份文件格式不正确")}};reader.readAsText(f);
+};
+render();
+</script>
+</body>
+</html>
